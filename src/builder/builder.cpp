@@ -3,6 +3,7 @@
 
 using namespace std;
 
+namespace html{
 
 string HtmlElement::str(int indent = 0) const{
     ostringstream oss;
@@ -44,3 +45,7 @@ string HtmlBuilder::str()
 {
     return root.str();
 }
+
+
+
+};
