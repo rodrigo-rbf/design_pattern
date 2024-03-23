@@ -6,10 +6,17 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <tuple>
+#include <filesystem>
+
 #include <boost/lexical_cast.hpp>
 
-class SingletonDatabase
+class Database
+{
+    public:
+        virtual size_t get_population(const std::string capital_name) = 0;
+};
+
+class SingletonDatabase : public Database
 {
     public:
         SingletonDatabase(SingletonDatabase const&) = delete;
@@ -20,9 +27,8 @@ class SingletonDatabase
             static SingletonDatabase db;
             return db;
         }
-        
 
-        size_t get_population(std::string capital)
+        size_t get_population(const std::string capital)
         {
             return capitals[capital];
         }
@@ -30,10 +36,10 @@ class SingletonDatabase
     private:
         SingletonDatabase()
         {
-            std::string path = "/home/rodrigo/Rodrigobf/StudyProgramming/designPattern/test";
+            std::string path = std::filesystem::current_path();
             std::string file_name = "capitaisbrasil.txt";
             std::cout << "Initializing database\n";
-            std::ifstream ifs(path + '/' + file_name);
+            std::ifstream ifs(path + "/test/" + file_name);
             std::string s, s2;
 
             while(getline(ifs, s))
@@ -42,19 +48,33 @@ class SingletonDatabase
                 getline(ifs, s2);
                 try {
                 pop = static_cast<size_t>(std::stoul(s2));
-                //std::cout << "Valor inteiro: " << pop << std::endl;
                 } catch (const std::invalid_argument& e) {
                     std::cerr << "Erro - invalid_argument: " << e.what() << std::endl;
                 } catch (const std::out_of_range& e) {
                     std::cerr << "Erro - out of range: " << e.what() << std::endl;
                 }
-                
-                capitals[s] = pop;
-                
+            
+                capitals[s] = pop;  
             }
         }
 
         std::map<std::string, int> capitals;
 };
+
+struct SingletonRecordFinder
+{
+    SingletonRecordFinder(){};
+    size_t totalpopulation(std::vector<std::string> names)
+    {
+        size_t result{0};
+        for (const auto& name : names)
+        {
+            result += SingletonDatabase::get().get_population(name);
+        }
+        return result;
+    }
+};
+
+
 
 #endif
